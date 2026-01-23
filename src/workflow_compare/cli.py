@@ -99,7 +99,7 @@ Examples:
         
         # Compare
         print("Comparing workflow runs...", file=sys.stderr)
-        comparator = WorkflowComparator(run1_data, run2_data)
+        comparator = WorkflowComparator(run1_data, run2_data, api_client=api)
         comparison = comparator.get_full_comparison()
         
         # Generate report

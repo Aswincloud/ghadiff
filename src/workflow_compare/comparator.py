@@ -9,16 +9,18 @@ from datetime import datetime
 class WorkflowComparator:
     """Compare two workflow runs and generate diff data"""
     
-    def __init__(self, run1_data: Dict[str, Any], run2_data: Dict[str, Any]):
+    def __init__(self, run1_data: Dict[str, Any], run2_data: Dict[str, Any], api_client=None):
         """
         Initialize comparator with two workflow run datasets
         
         Args:
             run1_data: First workflow run data (from GitHubAPI.get_workflow_run_full)
             run2_data: Second workflow run data (from GitHubAPI.get_workflow_run_full)
+            api_client: Optional GitHubAPI client for fetching logs
         """
         self.run1_data = run1_data
         self.run2_data = run2_data
+        self.api_client = api_client
     
     @staticmethod
     def _parse_duration(started_at: str, completed_at: str) -> float:
@@ -29,6 +31,49 @@ class WorkflowComparator:
         start = datetime.fromisoformat(started_at.replace('Z', '+00:00'))
         end = datetime.fromisoformat(completed_at.replace('Z', '+00:00'))
         return (end - start).total_seconds()
+    
+    def _extract_error_from_job(self, job_id: int) -> str:
+        """Extract key error message from job logs"""
+        if not self.api_client:
+            return None
+        
+        try:
+            import re
+            logs = self.api_client.get_job_logs(job_id)
+            
+            # Look for common error patterns
+            error_patterns = [
+                r'TT_FATAL @ ([^:]+):(\d+): (.+?)(?=\n)',
+                r'TT_THROW @ ([^:]+):(\d+): (.+?)(?=\n)',
+                r'what\(\):\s*(.+?)(?=\n)',
+                r'Error:\s*(.+?)(?=\n)',
+                r'FAILED:\s*(.+?)(?=\n)',
+                r'AssertionError:\s*(.+?)(?=\n)',
+                r'terminate called after throwing an instance of \'([^\']+)\'',
+            ]
+            
+            errors = []
+            for pattern in error_patterns:
+                matches = re.findall(pattern, logs, re.MULTILINE)
+                if matches:
+                    if isinstance(matches[0], tuple):
+                        errors.extend(matches[:3])  # Get first 3 matches
+                    else:
+                        errors.extend(matches[:3])
+            
+            if errors:
+                # Format the error message
+                if isinstance(errors[0], tuple) and len(errors[0]) >= 3:
+                    # TT_FATAL/TT_THROW format
+                    file_path, line_num, message = errors[0]
+                    return f"{message} @ {file_path}:{line_num}"
+                else:
+                    # Simple error message
+                    return str(errors[0])[:200]  # Limit length
+            
+            return None
+        except Exception as e:
+            return None
     
     def compare_runs(self) -> Dict[str, Any]:
         """
@@ -101,26 +146,58 @@ class WorkflowComparator:
             
             if job1:
                 job1_duration = self._parse_duration(job1.get('started_at'), job1.get('completed_at'))
+                # Extract failed steps if job failed
+                failed_steps = []
+                error_message = None
+                if job1.get('conclusion') == 'failure':
+                    for step in job1.get('steps', []):
+                        if step.get('conclusion') == 'failure':
+                            failed_steps.append(step.get('name'))
+                    # Try to fetch error message from logs
+                    try:
+                        error_message = self._extract_error_from_job(job1.get('id'))
+                    except:
+                        pass  # If we can't get logs, continue without them
+                
                 comparison['run1'] = {
                     'id': job1.get('id'),
                     'status': job1.get('status'),
                     'conclusion': job1.get('conclusion'),
                     'started_at': job1.get('started_at'),
                     'completed_at': job1.get('completed_at'),
-                    'duration_seconds': job1_duration
+                    'duration_seconds': job1_duration,
+                    'failed_steps': failed_steps,
+                    'error_message': error_message,
+                    'html_url': job1.get('html_url')
                 }
             else:
                 comparison['run1'] = None
             
             if job2:
                 job2_duration = self._parse_duration(job2.get('started_at'), job2.get('completed_at'))
+                # Extract failed steps if job failed
+                failed_steps = []
+                error_message = None
+                if job2.get('conclusion') == 'failure':
+                    for step in job2.get('steps', []):
+                        if step.get('conclusion') == 'failure':
+                            failed_steps.append(step.get('name'))
+                    # Try to fetch error message from logs
+                    try:
+                        error_message = self._extract_error_from_job(job2.get('id'))
+                    except:
+                        pass  # If we can't get logs, continue without them
+                
                 comparison['run2'] = {
                     'id': job2.get('id'),
                     'status': job2.get('status'),
                     'conclusion': job2.get('conclusion'),
                     'started_at': job2.get('started_at'),
                     'completed_at': job2.get('completed_at'),
-                    'duration_seconds': job2_duration
+                    'duration_seconds': job2_duration,
+                    'failed_steps': failed_steps,
+                    'error_message': error_message,
+                    'html_url': job2.get('html_url')
                 }
             else:
                 comparison['run2'] = None

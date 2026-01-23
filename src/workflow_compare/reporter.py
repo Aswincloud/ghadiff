@@ -72,14 +72,16 @@ class Reporter:
         # Run comparison
         lines.append("OVERVIEW")
         lines.append("-" * 80)
-        lines.append(f"Run 1: #{runs['run1']['run_number']} ({runs['run1']['id']})")
-        lines.append(f"  Branch: {runs['run1']['head_branch']}")
+        
+        branch1 = runs['run1']['head_branch']
+        branch2 = runs['run2']['head_branch']
+        
+        lines.append(f"{branch1}: #{runs['run1']['run_number']} ({runs['run1']['id']})")
         lines.append(f"  SHA: {runs['run1']['head_sha']}")
         lines.append(f"  Status: {runs['run1']['status']} / {runs['run1']['conclusion']}")
         lines.append(f"  Duration: {self._format_duration(runs['run1']['duration_seconds'])}")
         lines.append("")
-        lines.append(f"Run 2: #{runs['run2']['run_number']} ({runs['run2']['id']})")
-        lines.append(f"  Branch: {runs['run2']['head_branch']}")
+        lines.append(f"{branch2}: #{runs['run2']['run_number']} ({runs['run2']['id']})")
         lines.append(f"  SHA: {runs['run2']['head_sha']}")
         lines.append(f"  Status: {runs['run2']['status']} / {runs['run2']['conclusion']}")
         lines.append(f"  Duration: {self._format_duration(runs['run2']['duration_seconds'])}")
@@ -93,48 +95,162 @@ class Reporter:
         
         lines.append("")
         
+        # Store branch names for later use
+        self.branch1 = branch1
+        self.branch2 = branch2
+        
         # Jobs comparison
         lines.append("JOBS COMPARISON")
         lines.append("-" * 80)
         
         jobs = self.data['jobs']
         
-        # Count stats
-        only_in_run1 = sum(1 for j in jobs if j['only_in_run1'])
-        only_in_run2 = sum(1 for j in jobs if j['only_in_run2'])
-        in_both = sum(1 for j in jobs if not j['only_in_run1'] and not j['only_in_run2'])
+        # Categorize jobs
+        only_in_run1 = [j for j in jobs if j['only_in_run1']]
+        only_in_run2 = [j for j in jobs if j['only_in_run2']]
+        in_both = [j for j in jobs if not j['only_in_run1'] and not j['only_in_run2']]
         
+        # For jobs in both, categorize by status
+        both_skipped = []
+        both_success = []
+        status_changed = []
+        failures = []
+        
+        for job in in_both:
+            if job.get('conclusion_changed'):
+                status_changed.append(job)
+            elif job['run1']['conclusion'] == 'skipped' and job['run2']['conclusion'] == 'skipped':
+                both_skipped.append(job)
+            elif job['run1']['conclusion'] == 'success' and job['run2']['conclusion'] == 'success':
+                # Both passed - hide completely regardless of time difference
+                both_success.append(job)
+            else:
+                # Has failures
+                failures.append(job)
+        
+        # Summary counts
         lines.append(f"Total jobs compared: {len(jobs)}")
-        lines.append(f"  In both runs: {in_both}")
-        lines.append(f"  Only in Run 1: {only_in_run1}")
-        lines.append(f"  Only in Run 2: {only_in_run2}")
+        lines.append(f"  In both branches: {len(in_both)}")
+        lines.append(f"  Only in {self.branch1}: {len(only_in_run1)}")
+        lines.append(f"  Only in {self.branch2}: {len(only_in_run2)}")
+        lines.append("")
+        lines.append("Status Summary:")
+        lines.append(f"  ✅ Both passed: {len(both_success)}")
+        lines.append(f"  ⏭️  Both skipped: {len(both_skipped)}")
+        lines.append(f"  ⚠️  Status changed between branches: {len(status_changed)}")
+        lines.append(f"  ❌ Has failures: {len(failures)}")
         lines.append("")
         
-        # Job details
-        for job in jobs:
-            if job['only_in_run1']:
-                lines.append(f"❓ {job['name']} (only in Run 1)")
-                lines.append(f"   Run 1: {self._get_status_emoji(job['run1']['conclusion'])} {job['run1']['conclusion']} - {self._format_duration(job['run1']['duration_seconds'])}")
-            elif job['only_in_run2']:
-                lines.append(f"❓ {job['name']} (only in Run 2)")
-                lines.append(f"   Run 2: {self._get_status_emoji(job['run2']['conclusion'])} {job['run2']['conclusion']} - {self._format_duration(job['run2']['duration_seconds'])}")
-            else:
-                # In both runs
-                changed_marker = "⚠️ " if job.get('conclusion_changed') else ""
-                lines.append(f"{changed_marker}{job['name']}")
+        # Show interesting jobs first
+        interesting_jobs = []
+        
+        # 1. Status changed jobs (most important)
+        if status_changed:
+            lines.append("=" * 80)
+            lines.append("⚠️  JOBS WITH STATUS CHANGES")
+            lines.append("=" * 80)
+            lines.append("")
+            for job in status_changed:
+                interesting_jobs.append(job)
+        
+        # 2. Jobs with failures
+        if failures:
+            lines.append("=" * 80)
+            lines.append("❌ JOBS WITH FAILURES")
+            lines.append("=" * 80)
+            lines.append("")
+            for job in failures:
+                interesting_jobs.append(job)
+        
+        # 3. Jobs only in one run
+        if only_in_run1 or only_in_run2:
+            lines.append("=" * 80)
+            lines.append("❓ JOBS IN ONLY ONE RUN")
+            lines.append("=" * 80)
+            lines.append("")
+        
+        # Now show the details for interesting jobs
+        for job in interesting_jobs:
+            changed_marker = "⚠️ " if job.get('conclusion_changed') else ""
+            lines.append(f"{changed_marker}{job['name']}")
+            
+            run1_emoji = self._get_status_emoji(job['run1']['conclusion'])
+            run2_emoji = self._get_status_emoji(job['run2']['conclusion'])
+            
+            # Simple format - just status and error
+            lines.append(f"   {self.branch1}: {run1_emoji} {job['run1']['conclusion']}")
+            if job['run1'].get('error_message'):
+                lines.append(f"          {job['run1']['error_message']}")
+            
+            lines.append(f"   {self.branch2}: {run2_emoji} {job['run2']['conclusion']}")
+            if job['run2'].get('error_message'):
+                lines.append(f"          {job['run2']['error_message']}")
+            
+            # Verbose mode - show timing and URLs
+            if verbose:
+                lines.append(f"   {self.branch1} details:")
+                lines.append(f"          Duration: {self._format_duration(job['run1']['duration_seconds'])}")
+                if job['run1'].get('failed_steps'):
+                    lines.append(f"          Failed steps: {', '.join(job['run1']['failed_steps'])}")
+                if job['run1'].get('html_url'):
+                    lines.append(f"          URL: {job['run1']['html_url']}")
                 
-                run1_emoji = self._get_status_emoji(job['run1']['conclusion'])
-                run2_emoji = self._get_status_emoji(job['run2']['conclusion'])
-                
-                lines.append(f"   Run 1: {run1_emoji} {job['run1']['conclusion']:10s} - {self._format_duration(job['run1']['duration_seconds'])}")
-                lines.append(f"   Run 2: {run2_emoji} {job['run2']['conclusion']:10s} - {self._format_duration(job['run2']['duration_seconds'])}")
+                lines.append(f"   {self.branch2} details:")
+                lines.append(f"          Duration: {self._format_duration(job['run2']['duration_seconds'])}")
+                if job['run2'].get('failed_steps'):
+                    lines.append(f"          Failed steps: {', '.join(job['run2']['failed_steps'])}")
+                if job['run2'].get('html_url'):
+                    lines.append(f"          URL: {job['run2']['html_url']}")
                 
                 if 'duration_diff_seconds' in job:
                     diff = job['duration_diff_seconds']
                     diff_pct = job['duration_diff_percent']
-                    lines.append(f"   Diff:  {self._format_diff(diff)} ({diff_pct:+.1f}%)")
+                    lines.append(f"   Time diff: {self._format_diff(diff)} ({diff_pct:+.1f}%)")
             
             lines.append("")
+        
+        # Show jobs only in one branch
+        for job in only_in_run1:
+            lines.append(f"❓ {job['name']} (only in {self.branch1})")
+            lines.append(f"   {self.branch1}: {self._get_status_emoji(job['run1']['conclusion'])} {job['run1']['conclusion']}")
+            if verbose:
+                lines.append(f"          Duration: {self._format_duration(job['run1']['duration_seconds'])}")
+            lines.append("")
+        
+        for job in only_in_run2:
+            lines.append(f"❓ {job['name']} (only in {self.branch2})")
+            lines.append(f"   {self.branch2}: {self._get_status_emoji(job['run2']['conclusion'])} {job['run2']['conclusion']}")
+            if verbose:
+                lines.append(f"          Duration: {self._format_duration(job['run2']['duration_seconds'])}")
+            lines.append("")
+        
+        # Show verbose details if requested
+        if verbose:
+            if both_success:
+                lines.append("=" * 80)
+                lines.append(f"✅ JOBS THAT PASSED IN BOTH BRANCHES ({len(both_success)})")
+                lines.append("=" * 80)
+                lines.append("")
+                for job in both_success:
+                    lines.append(f"{job['name']}")
+                    lines.append(f"   {self.branch1}: ✅ success - {self._format_duration(job['run1']['duration_seconds'])}")
+                    lines.append(f"   {self.branch2}: ✅ success - {self._format_duration(job['run2']['duration_seconds'])}")
+                    if 'duration_diff_seconds' in job:
+                        diff = job['duration_diff_seconds']
+                        diff_pct = job['duration_diff_percent']
+                        lines.append(f"   Diff:  {self._format_diff(diff)} ({diff_pct:+.1f}%)")
+                    lines.append("")
+            
+            if both_skipped:
+                lines.append("=" * 80)
+                lines.append(f"⏭️  JOBS SKIPPED IN BOTH BRANCHES ({len(both_skipped)})")
+                lines.append("=" * 80)
+                lines.append("")
+                for job in both_skipped[:10]:  # Limit to first 10
+                    lines.append(f"⏭️  {job['name']}")
+                if len(both_skipped) > 10:
+                    lines.append(f"... and {len(both_skipped) - 10} more skipped jobs")
+                lines.append("")
         
         lines.append("=" * 80)
         

@@ -71,7 +71,7 @@ class GitHubAPI:
     
     def get_workflow_jobs(self, run_id: int) -> list[Dict[str, Any]]:
         """
-        Get all jobs for a workflow run
+        Get all jobs for a workflow run with proper pagination
         
         Args:
             run_id: Workflow run ID
@@ -80,17 +80,22 @@ class GitHubAPI:
             List of job data
         """
         endpoint = f"/repos/{self.repo}/actions/runs/{run_id}/jobs"
-        data = self._make_request(endpoint)
+        jobs = []
+        page = 1
+        per_page = 100
         
-        jobs = data.get('jobs', [])
-        
-        # Handle pagination
-        while 'next' in data.get('links', {}):
-            next_url = data['links']['next']
-            response = self.session.get(next_url)
-            response.raise_for_status()
-            data = response.json()
-            jobs.extend(data.get('jobs', []))
+        while True:
+            params = {'per_page': per_page, 'page': page}
+            data = self._make_request(endpoint, params=params)
+            
+            page_jobs = data.get('jobs', [])
+            jobs.extend(page_jobs)
+            
+            # If we got fewer jobs than per_page, we've reached the end
+            if len(page_jobs) < per_page:
+                break
+            
+            page += 1
         
         return jobs
     
@@ -110,6 +115,23 @@ class GitHubAPI:
         response = self.session.get(url)
         response.raise_for_status()
         return response.content
+    
+    def get_job_logs(self, job_id: int) -> str:
+        """
+        Get logs for a specific job
+        
+        Args:
+            job_id: Job ID
+            
+        Returns:
+            Log content as string
+        """
+        endpoint = f"/repos/{self.repo}/actions/jobs/{job_id}/logs"
+        url = f"{self.BASE_URL}{endpoint}"
+        
+        response = self.session.get(url)
+        response.raise_for_status()
+        return response.text
     
     def get_workflow_run_full(self, run_id: int) -> Dict[str, Any]:
         """
