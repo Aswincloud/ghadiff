@@ -129,8 +129,8 @@ class TestReporter:
         text = reporter.to_text()
         
         assert 'GitHub Workflow Run Comparison' in text
-        assert 'Run 1: #1' in text
-        assert 'Run 2: #2' in text
+        assert 'main: #1' in text
+        assert 'main: #2' in text
     
     def test_to_json(self, sample_comparison):
         """Test JSON report generation"""
