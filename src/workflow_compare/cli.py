@@ -5,7 +5,6 @@ Command-line interface for workflow-compare
 
 import argparse
 import sys
-from typing import Optional
 
 from .api import GitHubAPI
 from .comparator import WorkflowComparator
@@ -21,17 +20,17 @@ def main():
 Examples:
   # Compare two runs (defaults to tenstorrent/tt-metal repo)
   workflow-compare 12345678 12345679
-  
+
   # Compare runs with specific repo
   workflow-compare 12345678 12345679 --repo owner/repo
-  
+
   # Generate HTML report
   workflow-compare 12345678 12345679 --format html --output report.html
-  
+
   # Use GitHub token from environment or provide directly
   export GITHUB_TOKEN=your_token_here
   workflow-compare 12345678 12345679
-  
+
   # Or provide token directly
   workflow-compare 12345678 12345679 --token your_token_here
         """,

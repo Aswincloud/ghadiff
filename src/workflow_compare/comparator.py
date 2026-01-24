@@ -73,7 +73,7 @@ class WorkflowComparator:
                     return str(errors[0])[:200]  # Limit length
 
             return None
-        except Exception as e:
+        except Exception:
             return None
 
     def compare_runs(self) -> Dict[str, Any]:
@@ -159,7 +159,7 @@ class WorkflowComparator:
                     # Try to fetch error message from logs
                     try:
                         error_message = self._extract_error_from_job(job1.get("id"))
-                    except:
+                    except Exception:
                         pass  # If we can't get logs, continue without them
 
                 comparison["run1"] = {
@@ -190,7 +190,7 @@ class WorkflowComparator:
                     # Try to fetch error message from logs
                     try:
                         error_message = self._extract_error_from_job(job2.get("id"))
-                    except:
+                    except Exception:
                         pass  # If we can't get logs, continue without them
 
                 comparison["run2"] = {

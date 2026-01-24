@@ -4,7 +4,6 @@ Reporter for generating comparison output
 
 import json
 from typing import Dict, Any
-from datetime import timedelta
 
 
 class Reporter:
@@ -427,7 +426,7 @@ class Reporter:
 </head>
 <body>
     <h1>GitHub Workflow Run Comparison</h1>
-    
+
     <div class="overview">
         <h2>Overview</h2>
         <table>
@@ -441,7 +440,7 @@ class Reporter:
         </table>
         <p><strong>Duration Difference:</strong> <span class="{'positive' if runs['duration_diff_seconds'] > 0 else 'negative'}">{self._format_diff(runs['duration_diff_seconds'])}</span></p>
     </div>
-    
+
     <h2>Jobs Comparison</h2>
     <table>
         <tr>
