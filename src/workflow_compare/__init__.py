@@ -2,7 +2,7 @@
 Workflow Compare - A tool to compare GitHub workflow runs
 """
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 from .api import GitHubAPI
 from .comparator import WorkflowComparator

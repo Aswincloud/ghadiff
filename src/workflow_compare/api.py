@@ -4,7 +4,7 @@ GitHub API client for fetching workflow run data
 
 import os
 import requests
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import time
 
 
@@ -66,7 +66,7 @@ class GitHubAPI:
         endpoint = f"/repos/{self.repo}/actions/runs/{run_id}"
         return self._make_request(endpoint)
 
-    def get_workflow_jobs(self, run_id: int) -> list[Dict[str, Any]]:
+    def get_workflow_jobs(self, run_id: int) -> List[Dict[str, Any]]:
         """
         Get all jobs for a workflow run with proper pagination
 
