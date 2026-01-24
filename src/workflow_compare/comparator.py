@@ -87,7 +87,13 @@ class WorkflowComparator:
                     return error_msg
 
             return None
-        except Exception:
+        except Exception as e:
+            # If we can't fetch logs (403, 404, etc), indicate this
+            error_str = str(e)
+            if "403" in error_str or "Forbidden" in error_str:
+                return "[Log access forbidden - check GitHub token permissions]"
+            elif "404" in error_str:
+                return "[Logs not found or expired]"
             return None
 
     def compare_runs(self) -> Dict[str, Any]:
