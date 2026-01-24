@@ -42,20 +42,30 @@ class WorkflowComparator:
 
             logs = self.api_client.get_job_logs(job_id)
 
-            # Look for common error patterns
+            # Look for common error patterns (order matters - most specific first)
             error_patterns = [
-                r"TT_FATAL @ ([^:]+):(\d+): (.+?)(?=\n)",
-                r"TT_THROW @ ([^:]+):(\d+): (.+?)(?=\n)",
-                r"what\(\):\s*(.+?)(?=\n)",
-                r"Error:\s*(.+?)(?=\n)",
-                r"FAILED:\s*(.+?)(?=\n)",
-                r"AssertionError:\s*(.+?)(?=\n)",
+                # GitHub Actions specific
+                r"Error:\s*(.+?)$",
+                # TT Metal specific errors
+                r"TT_FATAL @ ([^:]+):(\d+): (.+?)$",
+                r"TT_THROW @ ([^:]+):(\d+): (.+?)$",
+                # Python/C++ errors
+                r"what\(\):\s*(.+?)$",
+                r"FAILED:\s*(.+?)$",
+                r"AssertionError:\s*(.+?)$",
+                r"RuntimeError:\s*(.+?)$",
+                r"ValueError:\s*(.+?)$",
                 r"terminate called after throwing an instance of \'([^\']+)\'",
+                # Test failures
+                r"FAILED\s+(.+?)\s+-",
+                r"\[  FAILED  \]\s+(.+?)$",
+                # Build errors
+                r"error:\s*(.+?)$",
             ]
 
             errors = []
             for pattern in error_patterns:
-                matches = re.findall(pattern, logs, re.MULTILINE)
+                matches = re.findall(pattern, logs, re.MULTILINE | re.IGNORECASE)
                 if matches:
                     if isinstance(matches[0], tuple):
                         errors.extend(matches[:3])  # Get first 3 matches
@@ -69,8 +79,12 @@ class WorkflowComparator:
                     file_path, line_num, message = errors[0]
                     return f"{message} @ {file_path}:{line_num}"
                 else:
-                    # Simple error message
-                    return str(errors[0])[:200]  # Limit length
+                    # Simple error message - clean it up
+                    error_msg = str(errors[0]).strip()
+                    # Limit length but try to keep it meaningful
+                    if len(error_msg) > 300:
+                        error_msg = error_msg[:297] + "..."
+                    return error_msg
 
             return None
         except Exception:
