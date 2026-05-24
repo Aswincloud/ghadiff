@@ -1,6 +1,6 @@
 #!/bin/bash
 # Push ghadiff package to GitHub repository
-# Repository: https://github.com/Aswintechie/ghadiff
+# Repository: https://github.com/Aswincloud/ghadiff
 
 echo "╔════════════════════════════════════════════════════════════════════╗"
 echo "║           Push ghadiff to GitHub                                   ║"
@@ -34,7 +34,7 @@ fi
 
 echo ""
 echo "🔧 Configuring git..."
-git config user.name "Aswintechie"
+git config user.name "Aswincloud"
 git config user.email "aswin@example.com"
 echo "✅ Git configured"
 
@@ -62,7 +62,7 @@ Features:
 echo ""
 echo "🔗 Adding remote repository..."
 git remote remove origin 2>/dev/null || true
-git remote add origin https://github.com/Aswintechie/ghadiff.git
+git remote add origin https://github.com/Aswincloud/ghadiff.git
 echo "✅ Remote added"
 
 echo ""
@@ -84,7 +84,7 @@ echo ""
 echo "  git push -u origin main"
 echo ""
 echo "Authentication required:"
-echo "  - Username: Aswintechie"
+echo "  - Username: Aswincloud"
 echo "  - Password: (use GitHub Personal Access Token)"
 echo ""
 echo "To create a token:"
@@ -94,5 +94,5 @@ echo "  3. Select 'repo' scope"
 echo "  4. Copy and use as password"
 echo ""
 echo "After pushing, your package will be available at:"
-echo "  https://github.com/Aswintechie/ghadiff"
+echo "  https://github.com/Aswincloud/ghadiff"
 echo ""
