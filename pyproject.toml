@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Aswintechie", email = "Aswintechie@users.noreply.github.com"}
+    {name = "Aswincloud", email = "Aswincloud@users.noreply.github.com"}
 ]
 keywords = ["github", "workflow", "ci", "comparison", "analysis", "gha", "actions"]
 classifiers = [
@@ -41,9 +41,9 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Aswintechie/ghadiff"
-Repository = "https://github.com/Aswintechie/ghadiff"
-Issues = "https://github.com/Aswintechie/ghadiff/issues"
+Homepage = "https://github.com/Aswincloud/ghadiff"
+Repository = "https://github.com/Aswincloud/ghadiff"
+Issues = "https://github.com/Aswincloud/ghadiff/issues"
 
 [project.scripts]
 ghadiff = "workflow_compare.cli:main"
