@@ -22,7 +22,7 @@ pip install ghadiff
 ### From source
 
 ```bash
-git clone https://github.com/Aswintechie/ghadiff.git
+git clone https://github.com/Aswincloud/ghadiff.git
 cd ghadiff
 pip install -e .
 ```
@@ -180,7 +180,7 @@ print(reporter.to_text())
 ### Setup Development Environment
 
 ```bash
-git clone https://github.com/Aswintechie/ghadiff.git
+git clone https://github.com/Aswincloud/ghadiff.git
 cd ghadiff
 pip install -e ".[dev]"
 ```
@@ -215,8 +215,8 @@ MIT License
 
 ## Links
 
-- Repository: https://github.com/Aswintechie/ghadiff
-- Issues: https://github.com/Aswintechie/ghadiff/issues
+- Repository: https://github.com/Aswincloud/ghadiff
+- Issues: https://github.com/Aswincloud/ghadiff/issues
 - PyPI: https://pypi.org/project/ghadiff/
 
 ## Acknowledgments
