@@ -11,7 +11,7 @@ cd /home/ubuntu/ghadiff
 git init
 
 # Configure git
-git config user.name "Aswintechie"
+git config user.name "Aswincloud"
 git config user.email "aswin@example.com"
 
 # Add all files
@@ -31,7 +31,7 @@ git commit -m "Initial commit: ghadiff - GitHub Actions workflow run comparison 
 - Full documentation and examples"
 
 # Add remote
-git remote add origin https://github.com/Aswintechie/ghadiff.git
+git remote add origin https://github.com/Aswincloud/ghadiff.git
 
 # Rename branch to main
 git branch -M main
