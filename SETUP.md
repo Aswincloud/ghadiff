@@ -1,7 +1,7 @@
 # ghadiff - GitHub Actions Diff Tool
 
 **PyPI Package Name**: `ghadiff`  
-**Repository**: https://github.com/Aswintechie/ghadiff  
+**Repository**: https://github.com/Aswincloud/ghadiff  
 **Command**: `ghadiff`
 
 ## 🎉 Package Complete and Ready!
@@ -17,7 +17,7 @@
 pip install ghadiff
 
 # Or install from source
-git clone https://github.com/Aswintechie/ghadiff.git
+git clone https://github.com/Aswincloud/ghadiff.git
 cd ghadiff
 pip install -e .
 ```
