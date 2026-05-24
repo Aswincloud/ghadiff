@@ -7,7 +7,7 @@
 
 Package Name:      ghadiff
 PyPI Name:         ghadiff
-GitHub Repo:       https://github.com/Aswintechie/ghadiff
+GitHub Repo:       https://github.com/Aswincloud/ghadiff
 CLI Command:       ghadiff
 Version:           0.1.0
 License:           MIT
@@ -25,8 +25,8 @@ Default Repo:      tenstorrent/tt-metal
 ✅ UPDATED CONFIGURATION
    - pyproject.toml: Package name set to "ghadiff"
    - Entry point: ghadiff command
-   - Repository URLs: https://github.com/Aswintechie/ghadiff
-   - Author: Aswintechie
+   - Repository URLs: https://github.com/Aswincloud/ghadiff
+   - Author: Aswincloud
 
 ✅ UPDATED DOCUMENTATION
    - README.md: All examples now use "ghadiff"
@@ -86,7 +86,7 @@ cd /home/ubuntu/ghadiff
 git init
 
 # Configure git
-git config user.name "Aswintechie"
+git config user.name "Aswincloud"
 git config user.email "your_email@example.com"
 
 # Stage all files
@@ -96,7 +96,7 @@ git add .
 git commit -m "Initial commit: ghadiff - GitHub Actions workflow comparison tool"
 
 # Add remote repository
-git remote add origin https://github.com/Aswintechie/ghadiff.git
+git remote add origin https://github.com/Aswincloud/ghadiff.git
 
 # Rename branch to main
 git branch -M main
@@ -118,7 +118,7 @@ GitHub requires a Personal Access Token for authentication:
 6. Copy the token
 
 When pushing, use:
-  - Username: Aswintechie
+  - Username: Aswincloud
   - Password: (paste your personal access token)
 
 ===============================================================================
@@ -234,9 +234,9 @@ Output Formats:
 🔗 LINKS AND RESOURCES
 ===============================================================================
 
-GitHub Repository:   https://github.com/Aswintechie/ghadiff
+GitHub Repository:   https://github.com/Aswincloud/ghadiff
 PyPI Package:        https://pypi.org/project/ghadiff/ (after publishing)
-Issues:              https://github.com/Aswintechie/ghadiff/issues
+Issues:              https://github.com/Aswincloud/ghadiff/issues
 
 Documentation:
   - README.md              Complete user guide
@@ -255,7 +255,7 @@ Documentation:
 ✅ Package renamed to "ghadiff"
 ✅ All files updated with new name
 ✅ CLI command changed to "ghadiff"
-✅ GitHub URLs updated to Aswintechie/ghadiff
+✅ GitHub URLs updated to Aswincloud/ghadiff
 ✅ Documentation updated
 ✅ Git setup script created
 ✅ Directory renamed to /home/ubuntu/ghadiff
