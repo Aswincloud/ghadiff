@@ -14,8 +14,8 @@ PACKAGE INFORMATION
   💻 CLI Command:      ghadiff
   🔖 Version:          0.1.0
   📄 License:          MIT
-  👤 Author:           Aswintechie
-  🔗 Repository:       https://github.com/Aswintechie/ghadiff
+  👤 Author:           Aswincloud
+  🔗 Repository:       https://github.com/Aswincloud/ghadiff
   🏠 Default Repo:     tenstorrent/tt-metal
   📍 Location:         /home/ubuntu/ghadiff/
 
@@ -178,11 +178,11 @@ Option 2: Manual commands
 
 cd /home/ubuntu/ghadiff
 git init
-git config user.name "Aswintechie"
+git config user.name "Aswincloud"
 git config user.email "your_email@example.com"
 git add .
 git commit -m "Initial commit: ghadiff package"
-git remote add origin https://github.com/Aswintechie/ghadiff.git
+git remote add origin https://github.com/Aswincloud/ghadiff.git
 git branch -M main
 git push -u origin main
 
@@ -199,7 +199,7 @@ GitHub requires a Personal Access Token:
 5. Generate and copy the token
 
 When pushing:
-  Username: Aswintechie
+  Username: Aswincloud
   Password: (paste your personal access token)
 
 PUBLISHING TO PyPI
@@ -316,7 +316,7 @@ CHECKLIST
 ✅ Renamed to "ghadiff"
 ✅ All documentation updated
 ✅ CLI command: ghadiff
-✅ GitHub repo: Aswintechie/ghadiff
+✅ GitHub repo: Aswincloud/ghadiff
 ✅ PyPI name: ghadiff
 ✅ All files updated with new name
 ✅ Git scripts created
@@ -381,8 +381,8 @@ SUPPORT & DOCUMENTATION
 
 Created: December 11, 2025
 Package: ghadiff v0.1.0
-Author: Aswintechie
-Repository: https://github.com/Aswintechie/ghadiff
+Author: Aswincloud
+Repository: https://github.com/Aswincloud/ghadiff
 Location: /home/ubuntu/ghadiff/
 Status: ✅ COMPLETE AND READY
 
