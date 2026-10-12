@@ -22,6 +22,11 @@ class TestGitHubAPI:
         """Test initialization with custom repository"""
         api = GitHubAPI(repo="owner/repo")
         assert api.repo == "owner/repo"
+
+    def test_init_rejects_malformed_repo(self):
+        """Test initialization rejects repository path injection"""
+        with pytest.raises(ValueError, match="owner/repo"):
+            GitHubAPI(repo="owner/repo?redirect=https://example.com")
     
     @patch('workflow_compare.api.requests.Session.get')
     def test_get_workflow_run(self, mock_get):
