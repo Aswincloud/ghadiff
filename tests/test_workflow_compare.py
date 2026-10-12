@@ -22,6 +22,11 @@ class TestGitHubAPI:
         """Test initialization with custom repository"""
         api = GitHubAPI(repo="owner/repo")
         assert api.repo == "owner/repo"
+
+    def test_init_rejects_malformed_repo(self):
+        """Test initialization rejects repository path injection"""
+        with pytest.raises(ValueError, match="owner/repo"):
+            GitHubAPI(repo="owner/repo?redirect=https://example.com")
     
     @patch('workflow_compare.api.requests.Session.get')
     def test_get_workflow_run(self, mock_get):
@@ -156,3 +161,22 @@ class TestReporter:
         
         assert '<!DOCTYPE html>' in html
         assert '<title>Workflow Comparison</title>' in html
+
+    def test_to_html_escapes_api_values(self, sample_comparison):
+        """Test HTML reports do not interpret API-provided markup"""
+        sample_comparison["runs"]["run1"]["head_branch"] = "<script>alert(1)</script>"
+        sample_comparison["jobs"] = [{
+            "name": "<img src=x onerror=alert(1)>",
+            "only_in_run1": True,
+            "only_in_run2": False,
+            "run1": {
+                "conclusion": "success",
+                "duration_seconds": 1,
+            },
+        }]
+
+        html = Reporter(sample_comparison).to_html()
+
+        assert "<script>" not in html
+        assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html
+        assert "&lt;img src=x onerror=alert(1)&gt;" in html

@@ -3,6 +3,7 @@ Reporter for generating comparison output
 """
 
 import json
+from html import escape
 from typing import Dict, Any
 
 
@@ -375,6 +376,9 @@ class Reporter:
         """
         runs = self.data["runs"]
 
+        def html_value(value: Any) -> str:
+            return escape(str(value), quote=True)
+
         html = f"""
 <!DOCTYPE html>
 <html>
@@ -431,14 +435,14 @@ class Reporter:
         <h2>Overview</h2>
         <table>
             <tr><th>Metric</th><th>Run 1</th><th>Run 2</th></tr>
-            <tr><td>Run ID</td><td>#{runs['run1']['run_number']} ({runs['run1']['id']})</td><td>#{runs['run2']['run_number']} ({runs['run2']['id']})</td></tr>
-            <tr><td>Branch</td><td>{runs['run1']['head_branch']}</td><td>{runs['run2']['head_branch']}</td></tr>
-            <tr><td>SHA</td><td>{runs['run1']['head_sha']}</td><td>{runs['run2']['head_sha']}</td></tr>
-            <tr><td>Status</td><td>{runs['run1']['status']}</td><td>{runs['run2']['status']}</td></tr>
-            <tr><td>Conclusion</td><td class="{runs['run1']['conclusion']}">{runs['run1']['conclusion']}</td><td class="{runs['run2']['conclusion']}">{runs['run2']['conclusion']}</td></tr>
-            <tr><td>Duration</td><td>{self._format_duration(runs['run1']['duration_seconds'])}</td><td>{self._format_duration(runs['run2']['duration_seconds'])}</td></tr>
+            <tr><td>Run ID</td><td>#{html_value(runs['run1']['run_number'])} ({html_value(runs['run1']['id'])})</td><td>#{html_value(runs['run2']['run_number'])} ({html_value(runs['run2']['id'])})</td></tr>
+            <tr><td>Branch</td><td>{html_value(runs['run1']['head_branch'])}</td><td>{html_value(runs['run2']['head_branch'])}</td></tr>
+            <tr><td>SHA</td><td>{html_value(runs['run1']['head_sha'])}</td><td>{html_value(runs['run2']['head_sha'])}</td></tr>
+            <tr><td>Status</td><td>{html_value(runs['run1']['status'])}</td><td>{html_value(runs['run2']['status'])}</td></tr>
+            <tr><td>Conclusion</td><td class="{html_value(runs['run1']['conclusion'])}">{html_value(runs['run1']['conclusion'])}</td><td class="{html_value(runs['run2']['conclusion'])}">{html_value(runs['run2']['conclusion'])}</td></tr>
+            <tr><td>Duration</td><td>{html_value(self._format_duration(runs['run1']['duration_seconds']))}</td><td>{html_value(self._format_duration(runs['run2']['duration_seconds']))}</td></tr>
         </table>
-        <p><strong>Duration Difference:</strong> <span class="{'positive' if runs['duration_diff_seconds'] > 0 else 'negative'}">{self._format_diff(runs['duration_diff_seconds'])}</span></p>
+        <p><strong>Duration Difference:</strong> <span class="{'positive' if runs['duration_diff_seconds'] > 0 else 'negative'}">{html_value(self._format_diff(runs['duration_diff_seconds']))}</span></p>
     </div>
 
     <h2>Jobs Comparison</h2>
@@ -457,9 +461,9 @@ class Reporter:
             if job["only_in_run1"]:
                 html += f"""
         <tr>
-            <td>{job['name']}</td>
-            <td class="{job['run1']['conclusion']}">{self._get_status_emoji(job['run1']['conclusion'])} {job['run1']['conclusion']}</td>
-            <td>{self._format_duration(job['run1']['duration_seconds'])}</td>
+            <td>{html_value(job['name'])}</td>
+            <td class="{html_value(job['run1']['conclusion'])}">{self._get_status_emoji(job['run1']['conclusion'])} {html_value(job['run1']['conclusion'])}</td>
+            <td>{html_value(self._format_duration(job['run1']['duration_seconds']))}</td>
             <td>-</td>
             <td>-</td>
             <td>-</td>
@@ -468,11 +472,11 @@ class Reporter:
             elif job["only_in_run2"]:
                 html += f"""
         <tr>
-            <td>{job['name']}</td>
+            <td>{html_value(job['name'])}</td>
             <td>-</td>
             <td>-</td>
-            <td class="{job['run2']['conclusion']}">{self._get_status_emoji(job['run2']['conclusion'])} {job['run2']['conclusion']}</td>
-            <td>{self._format_duration(job['run2']['duration_seconds'])}</td>
+            <td class="{html_value(job['run2']['conclusion'])}">{self._get_status_emoji(job['run2']['conclusion'])} {html_value(job['run2']['conclusion'])}</td>
+            <td>{html_value(self._format_duration(job['run2']['duration_seconds']))}</td>
             <td>-</td>
         </tr>
 """
@@ -480,12 +484,12 @@ class Reporter:
                 diff_class = "positive" if job["duration_diff_seconds"] > 0 else "negative"
                 html += f"""
         <tr>
-            <td>{job['name']}</td>
-            <td class="{job['run1']['conclusion']}">{self._get_status_emoji(job['run1']['conclusion'])} {job['run1']['conclusion']}</td>
-            <td>{self._format_duration(job['run1']['duration_seconds'])}</td>
-            <td class="{job['run2']['conclusion']}">{self._get_status_emoji(job['run2']['conclusion'])} {job['run2']['conclusion']}</td>
-            <td>{self._format_duration(job['run2']['duration_seconds'])}</td>
-            <td class="{diff_class}">{self._format_diff(job['duration_diff_seconds'])}</td>
+            <td>{html_value(job['name'])}</td>
+            <td class="{html_value(job['run1']['conclusion'])}">{self._get_status_emoji(job['run1']['conclusion'])} {html_value(job['run1']['conclusion'])}</td>
+            <td>{html_value(self._format_duration(job['run1']['duration_seconds']))}</td>
+            <td class="{html_value(job['run2']['conclusion'])}">{self._get_status_emoji(job['run2']['conclusion'])} {html_value(job['run2']['conclusion'])}</td>
+            <td>{html_value(self._format_duration(job['run2']['duration_seconds']))}</td>
+            <td class="{diff_class}">{html_value(self._format_diff(job['duration_diff_seconds']))}</td>
         </tr>
 """
 

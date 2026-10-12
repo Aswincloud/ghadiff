@@ -3,6 +3,7 @@ GitHub API client for fetching workflow run data
 """
 
 import os
+import re
 import requests
 from typing import Dict, Any, Optional, List
 import time
@@ -13,6 +14,7 @@ class GitHubAPI:
 
     BASE_URL = "https://api.github.com"
     DEFAULT_REPO = "tenstorrent/tt-metal"
+    REQUEST_TIMEOUT = 30
 
     def __init__(self, token: Optional[str] = None, repo: Optional[str] = None):
         """
@@ -24,6 +26,8 @@ class GitHubAPI:
         """
         self.token = token or os.environ.get("GITHUB_TOKEN")
         self.repo = repo or self.DEFAULT_REPO
+        if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", self.repo):
+            raise ValueError("Repository must be in owner/repo format")
         self.session = requests.Session()
 
         if self.token:
@@ -39,7 +43,7 @@ class GitHubAPI:
         url = f"{self.BASE_URL}{endpoint}"
 
         while True:
-            response = self.session.get(url, params=params)
+            response = self.session.get(url, params=params, timeout=self.REQUEST_TIMEOUT)
 
             # Handle rate limiting
             if response.status_code == 403 and "X-RateLimit-Remaining" in response.headers:
@@ -109,7 +113,7 @@ class GitHubAPI:
         endpoint = f"/repos/{self.repo}/actions/runs/{run_id}/logs"
         url = f"{self.BASE_URL}{endpoint}"
 
-        response = self.session.get(url)
+        response = self.session.get(url, timeout=self.REQUEST_TIMEOUT)
         response.raise_for_status()
         return response.content
 
@@ -126,7 +130,7 @@ class GitHubAPI:
         endpoint = f"/repos/{self.repo}/actions/jobs/{job_id}/logs"
         url = f"{self.BASE_URL}{endpoint}"
 
-        response = self.session.get(url)
+        response = self.session.get(url, timeout=self.REQUEST_TIMEOUT)
         response.raise_for_status()
         return response.text
 
